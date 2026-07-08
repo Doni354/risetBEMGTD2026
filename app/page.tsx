@@ -185,7 +185,7 @@ async function HomePage() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.length > 0 ? events.map((event) => (
-                <div key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group">
+                <Link key={event.id} href={`/events/${event.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group block">
                   <div className="relative h-56 overflow-hidden bg-gray-100">
                     {event.imageUrl ? (
                       <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -208,7 +208,7 @@ async function HomePage() {
                       <span className="truncate w-full">📍 {event.location}</span>
                     </div>
                   </div>
-                </div>
+                </Link>
               )) : (
                 <div className="col-span-full text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
                   <span className="text-4xl mb-3 block">🗓️</span>
@@ -232,7 +232,7 @@ async function HomePage() {
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(MOCK_PRODUCTS.slice(0, 3)).map((product) => (
-                <div key={product.id} className="bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 hover:bg-white/20 transition-all duration-300 group shadow-xl">
+                <Link key={product.id} href={`/products/${product.id}`} className="bg-white/10 backdrop-blur-md rounded-3xl overflow-hidden border border-white/10 hover:border-white/30 hover:bg-white/20 transition-all duration-300 group shadow-xl block">
                   {product.imageUrl && (
                     <div className="h-56 overflow-hidden">
                       <img
@@ -249,12 +249,12 @@ async function HomePage() {
                       <p className="text-[#C9A84C] font-bold text-xl">
                         Rp {product.price.toLocaleString('id-ID')}
                       </p>
-                      <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#C9A84C]">
+                      <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white group-hover:bg-[#C9A84C] transition-colors">
                         →
                       </button>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
             <div className="text-center mt-12">

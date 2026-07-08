@@ -13,6 +13,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/', label: 'Beranda' },
+    { href: '/events', label: 'Acara' },
     { href: '/products', label: 'Produk Desa' },
     { href: '/login', label: 'Admin' },
   ];

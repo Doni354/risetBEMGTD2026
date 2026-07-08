@@ -52,7 +52,7 @@ export default async function EventsPage() {
         <div className="max-w-6xl mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {events.length > 0 ? events.map((event) => (
-              <div key={event.id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group flex flex-col">
+              <Link key={event.id} href={`/events/${event.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group flex flex-col block">
                 <div className="relative h-56 overflow-hidden bg-gray-100 flex-shrink-0">
                   {event.imageUrl ? (
                     <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
@@ -83,7 +83,7 @@ export default async function EventsPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             )) : (
               <div className="col-span-full py-20 bg-white rounded-3xl border border-dashed border-gray-200 text-center">
                 <CalendarDays className="w-16 h-16 text-gray-300 mx-auto mb-4" />

@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useEffect, useState } from 'react';
 import { Product } from '@/lib/types';
 import { MessageCircle, ShoppingBag } from 'lucide-react';
@@ -116,9 +118,10 @@ export default function ProductsPage() {
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {filteredProducts.map((product) => (
-                    <div
+                    <Link
+                      href={`/products/${product.id}`}
                       key={product.id}
-                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group"
+                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group relative block"
                     >
                       {product.imageUrl && (
                         <div className="h-52 overflow-hidden">
@@ -132,8 +135,8 @@ export default function ProductsPage() {
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <h3 className="font-bold text-gray-900">{product.name}</h3>
-                            <span className="text-xs text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded-full font-medium">
+                            <h3 className="font-bold text-gray-900 group-hover:text-[#1B4332] transition-colors">{product.name}</h3>
+                            <span className="text-xs text-[#1B4332] bg-[#1B4332]/5 px-2 py-0.5 rounded-full font-medium inline-block mt-1">
                               {product.category}
                             </span>
                           </div>
@@ -153,12 +156,13 @@ export default function ProductsPage() {
                               <p className="text-xs text-gray-400">Stok: {product.stock}</p>
                             )}
                           </div>
-                          <a
-                            href={product.whatsappLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => { if (product.stock === 0) e.preventDefault(); }}
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition ${
+                          <button
+                            onClick={(e) => { 
+                              e.preventDefault(); 
+                              e.stopPropagation();
+                              if (product.stock > 0) window.open(product.whatsappLink, '_blank'); 
+                            }}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition z-10 relative ${
                               product.stock > 0
                                 ? 'bg-green-600 text-white hover:bg-green-700'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -166,10 +170,10 @@ export default function ProductsPage() {
                           >
                             <MessageCircle className="w-4 h-4" />
                             Pesan
-                          </a>
+                          </button>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
 
