@@ -107,7 +107,7 @@ export default function AdminPage() {
       <aside className={`
         fixed top-0 left-0 h-full z-30 w-64 bg-[#1B4332] flex flex-col transition-transform duration-300
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto
+        lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen lg:z-auto
       `}>
         {/* Logo / Brand */}
         <div className="px-5 py-6 border-b border-white/10">

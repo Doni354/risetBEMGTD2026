@@ -61,12 +61,19 @@ export default function ImageUpload({ idToken, value, onChange, label = 'Gambar'
 
       {/* Preview */}
       {value && (
-        <div className="relative w-full h-40 rounded-xl overflow-hidden border border-gray-200 bg-gray-50 group">
-          <img src={value} alt="Preview" className="w-full h-full object-cover" />
+        <div className="relative w-full h-48 rounded-xl overflow-hidden border border-gray-200 bg-gray-900 group flex items-center justify-center">
+          {/* Blurred Background */}
+          <div
+            className="absolute inset-0 bg-cover bg-center blur-md opacity-40 scale-110 pointer-events-none"
+            style={{ backgroundImage: `url(${value})` }}
+          />
+          {/* Main Image */}
+          <img src={value} alt="Preview" className="relative z-10 w-full h-full object-contain drop-shadow-lg" />
+          
           <button
             type="button"
             onClick={() => onChange('')}
-            className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition hover:bg-black/80"
+            className="absolute top-2 right-2 z-20 bg-black/60 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition hover:bg-black/90 shadow-sm"
           >
             <X className="w-4 h-4" />
           </button>
