@@ -3,16 +3,19 @@ import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
 import { adminDb } from '@/lib/firebase/admin';
 import { Product } from '@/lib/types';
 
+type RouteParams = { params: Promise<{ id: string }> };
+
 /**
  * GET /api/products/[id]
  * Get product by ID (public)
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
-    const docSnap = await adminDb.collection('products').doc(params.id).get();
+    const { id } = await params;
+    const docSnap = await adminDb.collection('products').doc(id).get();
 
     if (!docSnap.exists) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
@@ -38,7 +41,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const token = getTokenFromRequest(request);
@@ -47,16 +50,17 @@ export async function PATCH(
     const admin = await verifyAdmin(token);
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
+    const { id } = await params;
     const data = await request.json();
 
-    await adminDb.collection('products').doc(params.id).update({
+    await adminDb.collection('products').doc(id).update({
       ...data,
       updatedAt: Date.now(),
       approvedBy: admin.id,
       approvedAt: data.approved ? Date.now() : null,
     });
 
-    return NextResponse.json({ message: 'Product updated successfully', id: params.id });
+    return NextResponse.json({ message: 'Product updated successfully', id });
   } catch (error) {
     console.error('[API] Error updating product:', error);
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
@@ -69,7 +73,7 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   try {
     const token = getTokenFromRequest(request);
@@ -78,9 +82,10 @@ export async function DELETE(
     const admin = await verifyAdmin(token);
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-    await adminDb.collection('products').doc(params.id).delete();
+    const { id } = await params;
+    await adminDb.collection('products').doc(id).delete();
 
-    return NextResponse.json({ message: 'Product deleted successfully', id: params.id });
+    return NextResponse.json({ message: 'Product deleted successfully', id });
   } catch (error) {
     console.error('[API] Error deleting product:', error);
     return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
