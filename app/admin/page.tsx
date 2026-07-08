@@ -3,54 +3,54 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { VillageProfile } from '@/lib/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import VillageProfileForm from '@/components/admin/village-profile-form';
 import ProductManagement from '@/components/admin/product-management';
-import { Loader2, LogOut, LayoutDashboard, ShoppingBag, MapPin, ShieldAlert } from 'lucide-react';
+import EventManagement from '@/components/admin/event-management';
+import DashboardStats from '@/components/admin/dashboard-stats';
+import {
+  Loader2, LogOut, LayoutDashboard, ShoppingBag, MapPin, ShieldAlert,
+  CalendarDays, ChevronRight, Menu, X
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-/**
- * Admin Dashboard Page
- * Flow:
- * 1. Cek auth state via useAuth hook
- * 2. Jika belum login → redirect ke /login
- * 3. Jika sudah login → verifikasi admin status via API
- * 4. Jika bukan admin → tampilkan Access Denied
- * 5. Jika admin → tampilkan dashboard tabs
- */
+type Module = 'dashboard' | 'products' | 'events' | 'profile';
+
+const NAV_ITEMS: { id: Module; label: string; icon: React.FC<{ className?: string }> }[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'products', label: 'Produk', icon: ShoppingBag },
+  { id: 'events', label: 'Acara', icon: CalendarDays },
+  { id: 'profile', label: 'Profil Desa', icon: MapPin },
+];
+
 export default function AdminPage() {
   const { user, loading: authLoading, idToken, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminId, setAdminId] = useState('');
   const [villageProfile, setVillageProfile] = useState<VillageProfile | null>(null);
+  const [activeModule, setActiveModule] = useState<Module>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
-
-    if (!isAuthenticated) {
-      router.push('/login');
-      return;
-    }
+    if (!isAuthenticated) { router.push('/login'); return; }
 
     const verifyAdmin = async () => {
       if (!idToken) return;
       try {
         const verifyRes = await fetch('/api/verify-admin', {
-          headers: { 'Authorization': `Bearer ${idToken}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         });
-        
         if (verifyRes.ok) {
+          const adminData = await verifyRes.json();
           setIsAdmin(true);
-          
-          // Only fetch profile if user is verified admin
+          setAdminId(adminData.uid || user?.uid || '');
+
           const profileRes = await fetch('/api/village-profile');
-          if (profileRes.ok) {
-            const profile = await profileRes.json();
-            setVillageProfile(profile);
-          }
+          if (profileRes.ok) setVillageProfile(await profileRes.json());
         }
       } catch (error) {
         console.error('Admin verification failed:', error);
@@ -58,16 +58,11 @@ export default function AdminPage() {
         setLoading(false);
       }
     };
-
     verifyAdmin();
-  }, [authLoading, isAuthenticated, idToken, router]);
+  }, [authLoading, isAuthenticated, idToken, router, user]);
 
-  const handleLogout = async () => {
-    await logout();
-    router.push('/');
-  };
+  const handleLogout = async () => { await logout(); router.push('/'); };
 
-  // Loading state
   if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -79,7 +74,6 @@ export default function AdminPage() {
     );
   }
 
-  // Access Denied
   if (!isAuthenticated || !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -90,77 +84,136 @@ export default function AdminPage() {
           <h1 className="text-xl font-bold text-gray-900 mb-2">Akses Ditolak</h1>
           <p className="text-gray-500 text-sm mb-6">
             Akun Google Anda ({user?.email}) tidak terdaftar sebagai administrator desa.
-            Hubungi admin untuk mendapatkan akses.
           </p>
           <div className="flex gap-3 justify-center">
             <Button variant="outline" onClick={handleLogout}>Logout</Button>
-            <Link href="/">
-              <Button>Kembali ke Beranda</Button>
-            </Link>
+            <Link href="/"><Button>Kembali ke Beranda</Button></Link>
           </div>
         </div>
       </div>
     );
   }
 
+  const activeNav = NAV_ITEMS.find((n) => n.id === activeModule);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Sidebar-style header */}
-      <header className="bg-[#1B4332] text-white">
-        <div className="max-w-6xl mx-auto px-4 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <LayoutDashboard className="w-6 h-6" />
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/30 z-20 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`
+        fixed top-0 left-0 h-full z-30 w-64 bg-[#1B4332] flex flex-col transition-transform duration-300
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static lg:z-auto
+      `}>
+        {/* Logo / Brand */}
+        <div className="px-5 py-6 border-b border-white/10">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-bold">Admin Dashboard</h1>
-              <p className="text-white/70 text-xs">{user?.displayName || user?.email}</p>
+              <h1 className="text-white font-bold text-base leading-tight">Admin Panel</h1>
+              <p className="text-white/50 text-xs mt-0.5">CMS Desa</p>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-white/70 hover:text-white text-sm transition">
-              Lihat Situs →
-            </Link>
-            <Button
-              onClick={handleLogout}
-              variant="outline"
-              size="sm"
-              className="text-white border-white/30 hover:bg-white/10 bg-transparent"
-            >
-              <LogOut className="w-4 h-4 mr-1" />
-              Logout
-            </Button>
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white/60 hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
-      </header>
 
-      {/* Content */}
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-white border border-gray-200 rounded-xl p-1">
-            <TabsTrigger value="profile" className="rounded-lg data-[state=active]:bg-[#1B4332] data-[state=active]:text-white flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              Profil Desa
-            </TabsTrigger>
-            <TabsTrigger value="products" className="rounded-lg data-[state=active]:bg-[#1B4332] data-[state=active]:text-white flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4" />
-              Produk
-            </TabsTrigger>
-          </TabsList>
+        {/* Nav Items */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => { setActiveModule(id); setSidebarOpen(false); }}
+              className={`
+                w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all text-left
+                ${activeModule === id
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/60 hover:bg-white/10 hover:text-white'
+                }
+              `}
+            >
+              <Icon className="w-4 h-4 flex-shrink-0" />
+              {label}
+              {activeModule === id && <ChevronRight className="w-3.5 h-3.5 ml-auto opacity-60" />}
+            </button>
+          ))}
+        </nav>
 
-          <TabsContent value="profile" className="space-y-4">
-            {villageProfile && (
-              <VillageProfileForm
-                initialData={villageProfile}
-                idToken={idToken}
-                onSuccess={() => alert('Profil berhasil diperbarui!')}
-              />
-            )}
-          </TabsContent>
+        {/* User + Logout */}
+        <div className="px-3 py-4 border-t border-white/10">
+          <div className="px-3 py-2 mb-2">
+            <p className="text-white text-sm font-medium truncate">{user?.displayName || user?.email}</p>
+            <p className="text-white/40 text-xs truncate">{user?.email}</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-white/60 hover:bg-white/10 hover:text-white text-sm transition-all"
+          >
+            <LogOut className="w-4 h-4" />Logout
+          </button>
+        </div>
+      </aside>
 
-          <TabsContent value="products" className="space-y-4">
-            <ProductManagement idToken={idToken} />
-          </TabsContent>
-        </Tabs>
-      </main>
+      {/* Main Content */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Top Bar */}
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 lg:px-8 py-4 flex items-center gap-4">
+          <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <Menu className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span>Admin</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+            <span className="text-gray-900 font-medium">{activeNav?.label}</span>
+          </div>
+          <div className="ml-auto">
+            <Link href="/" className="text-sm text-gray-400 hover:text-gray-700 transition">
+              Lihat Situs →
+            </Link>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-4 lg:p-8 max-w-5xl w-full mx-auto">
+          {activeModule === 'dashboard' && (
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-gray-900">Dashboard</h2>
+              <p className="text-sm text-gray-500 mb-6">Ringkasan aktivitas CMS Desa</p>
+              <DashboardStats idToken={idToken} />
+            </div>
+          )}
+
+          {activeModule === 'products' && (
+            <ProductManagement idToken={idToken} adminId={adminId} />
+          )}
+
+          {activeModule === 'events' && (
+            <EventManagement idToken={idToken} adminId={adminId} />
+          )}
+
+          {activeModule === 'profile' && (
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold text-gray-900">Profil Desa</h2>
+              <p className="text-sm text-gray-500 mb-6">Informasi desa yang ditampilkan ke publik</p>
+              {villageProfile ? (
+                <VillageProfileForm
+                  initialData={villageProfile}
+                  idToken={idToken}
+                  onSuccess={() => {}}
+                />
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <p className="text-sm">Data profil desa tidak tersedia.</p>
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

@@ -37,7 +37,9 @@ export async function GET(
 
 /**
  * PATCH /api/products/[id]
- * Update product (admin only)
+ * Update product (admin only).
+ * - Jika createdBy === admin.id: bisa edit semua field
+ * - Jika bukan (buatan warga): hanya bisa ubah 'approved'
  */
 export async function PATCH(
   request: NextRequest,
@@ -51,21 +53,35 @@ export async function PATCH(
     if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
+    const docSnap = await adminDb.collection('products').doc(id).get();
+    if (!docSnap.exists) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+
+    const existing = docSnap.data() as Product;
     const data = await request.json();
 
-    await adminDb.collection('products').doc(id).update({
-      ...data,
-      updatedAt: Date.now(),
-      approvedBy: admin.id,
-      approvedAt: data.approved ? Date.now() : null,
-    });
+    let updateData: Record<string, unknown>;
 
+    if (existing.createdBy === admin.id) {
+      // Full edit — produk buatan admin ini sendiri
+      updateData = { ...data, updatedAt: Date.now() };
+    } else {
+      // Restricted — hanya bisa approve/reject (data warga)
+      updateData = {
+        approved: data.approved,
+        approvedBy: admin.id,
+        approvedAt: data.approved ? Date.now() : null,
+        updatedAt: Date.now(),
+      };
+    }
+
+    await adminDb.collection('products').doc(id).update(updateData);
     return NextResponse.json({ message: 'Product updated successfully', id });
   } catch (error) {
     console.error('[API] Error updating product:', error);
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
+
 
 /**
  * DELETE /api/products/[id]

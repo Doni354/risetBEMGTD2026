@@ -3,145 +3,122 @@
 import { useState, useEffect } from 'react';
 import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductForm from './product-form';
 import ProductList from './product-list';
-import { Plus } from 'lucide-react';
+import { Plus, ShoppingBag } from 'lucide-react';
 
 interface ProductManagementProps {
   idToken: string | null;
+  adminId: string;
 }
 
-export default function ProductManagement({ idToken }: ProductManagementProps) {
+export default function ProductManagement({ idToken, adminId }: ProductManagementProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved'>('pending');
 
-  // Fetch products for admin (both approved and pending)
   useEffect(() => {
+    if (!idToken) return;
     const fetchProducts = async () => {
-      if (!idToken) return;
-
       try {
         setLoading(true);
-        const response = await fetch('/api/products?page=1&limit=100', {
-          headers: {
-            'Authorization': `Bearer ${idToken}`,
-          },
+        const res = await fetch('/api/products?page=1&limit=100', {
+          headers: { Authorization: `Bearer ${idToken}` },
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          setProducts(data.products);
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data.products || []);
         }
-      } catch (error) {
-        console.error('Failed to fetch products:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, [idToken]);
 
-  const handleProductSaved = (newProduct: Product) => {
-    if (selectedProduct) {
-      setProducts(products.map((p) => (p.id === newProduct.id ? newProduct : p)));
-    } else {
-      setProducts([newProduct, ...products]);
-    }
+  const handleSaved = (p: Product) => {
+    setProducts((prev) => selectedProduct ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]);
     setShowForm(false);
     setSelectedProduct(null);
   };
 
-  const handleProductDeleted = (productId: string) => {
-    setProducts(products.filter((p) => p.id !== productId));
-  };
+  const handleDeleted = (id: string) => setProducts((prev) => prev.filter((p) => p.id !== id));
+  const handleApproved = (p: Product) => setProducts((prev) => prev.map((x) => x.id === p.id ? p : x));
 
-  const approvedProducts = products.filter((p) => p.approved);
-  const pendingProducts = products.filter((p) => !p.approved);
+  const pending = products.filter((p) => !p.approved);
+  const approved = products.filter((p) => p.approved);
 
   return (
     <div className="space-y-6">
-      {/* Header and Add Product Button */}
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Manajemen Produk</h2>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">Manajemen Produk</h2>
+          <p className="text-xs text-gray-400 mt-0.5">{products.length} produk terdaftar</p>
+        </div>
         {!showForm && (
-          <Button
-            onClick={() => {
-              setShowForm(true);
-              setSelectedProduct(null);
-            }}
-            className="bg-[#1B4332] text-white hover:bg-[#1B4332]/90"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            + Tambah Produk
+          <Button onClick={() => { setShowForm(true); setSelectedProduct(null); }} className="bg-[#1B4332] text-white hover:bg-[#1B4332]/90">
+            <Plus className="w-4 h-4 mr-1.5" />
+            Tambah Produk
           </Button>
         )}
       </div>
 
-      {/* Product Form */}
       {showForm && (
         <ProductForm
           idToken={idToken}
           initialData={selectedProduct || undefined}
-          onSuccess={handleProductSaved}
-          onCancel={() => {
-            setShowForm(false);
-            setSelectedProduct(null);
-          }}
+          onSuccess={handleSaved}
+          onCancel={() => { setShowForm(false); setSelectedProduct(null); }}
         />
       )}
 
-      {/* Product Lists */}
-      <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-xl h-12 mb-6">
-          <TabsTrigger value="pending" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Menunggu Persetujuan ({pendingProducts.length})
-          </TabsTrigger>
-          <TabsTrigger value="approved" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            Disetujui ({approvedProducts.length})
-          </TabsTrigger>
-        </TabsList>
+      {/* Stat mini */}
+      {!loading && (
+        <div className="flex gap-3">
+          <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2 flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-amber-500" />
+            <span className="text-sm font-semibold text-amber-700">{pending.length}</span>
+            <span className="text-xs text-amber-500">Pending</span>
+          </div>
+          <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2 flex items-center gap-2">
+            <ShoppingBag className="w-4 h-4 text-emerald-500" />
+            <span className="text-sm font-semibold text-emerald-700">{approved.length}</span>
+            <span className="text-xs text-emerald-500">Disetujui</span>
+          </div>
+        </div>
+      )}
 
-        <TabsContent value="pending" className="space-y-4">
-          {pendingProducts.length > 0 ? (
-            <ProductList
-              products={pendingProducts}
-              idToken={idToken}
-              onDelete={handleProductDeleted}
-              onEdit={(product) => {
-                setSelectedProduct(product);
-                setShowForm(true);
-              }}
-              showApprovalButton
-            />
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No pending products
-            </div>
-          )}
-        </TabsContent>
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        {(['pending', 'approved'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            {tab === 'pending' ? `Menunggu (${pending.length})` : `Disetujui (${approved.length})`}
+          </button>
+        ))}
+      </div>
 
-        <TabsContent value="approved" className="space-y-4">
-          {approvedProducts.length > 0 ? (
-            <ProductList
-              products={approvedProducts}
-              idToken={idToken}
-              onDelete={handleProductDeleted}
-              onEdit={(product) => {
-                setSelectedProduct(product);
-                setShowForm(true);
-              }}
-            />
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              No approved products
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+      {loading ? (
+        <div className="space-y-3 animate-pulse">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-24 bg-gray-100 rounded-2xl" />)}
+        </div>
+      ) : (
+        <ProductList
+          products={activeTab === 'pending' ? pending : approved}
+          idToken={idToken}
+          adminId={adminId}
+          onDelete={handleDeleted}
+          onEdit={(p) => { setSelectedProduct(p); setShowForm(true); }}
+          onApprove={handleApproved}
+          showApprovalButton={activeTab === 'pending'}
+        />
+      )}
     </div>
   );
 }

@@ -53,6 +53,34 @@ export interface Product {
   updatedAt: number;
 }
 
+/** Acara/Event warga desa - collection: events */
+export interface VillageEvent {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  date: number; // unix timestamp
+  endDate?: number;
+  organizer: string; // nama penyelenggara
+  category: EventCategory;
+  imageUrl?: string;
+  approved: boolean;
+  createdBy: string; // uid admin or 'warga:{phone}'
+  approvedBy?: string;
+  approvedAt?: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export type EventCategory =
+  | 'Keagamaan'
+  | 'Olahraga'
+  | 'Kebudayaan'
+  | 'Pendidikan'
+  | 'Sosial'
+  | 'Pemerintahan'
+  | 'Lainnya';
+
 /** Admin user - collection: admin_users */
 export interface AdminUser {
   id: string;
