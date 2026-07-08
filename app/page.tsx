@@ -28,12 +28,13 @@ async function HomePage() {
 
     const eventsSnap = await adminDb.collection('events')
       .where('approved', '==', true)
-      .orderBy('date', 'desc')
-      .limit(3)
       .get();
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    events = eventsSnap.docs.map((doc: any) => doc.data() as VillageEvent);
+    let fetchedEvents = eventsSnap.docs.map((doc: any) => doc.data() as VillageEvent);
+    // Sort in memory to avoid Firebase Composite Index requirement error
+    fetchedEvents.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
+    events = fetchedEvents.slice(0, 3);
   } catch (error) {
     console.error('Error fetching data on server:', error);
   }

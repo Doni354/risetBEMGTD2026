@@ -19,11 +19,12 @@ export default async function EventsPage() {
   try {
     const snapshot = await adminDb.collection('events')
       .where('approved', '==', true)
-      .orderBy('date', 'desc')
       .get();
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    events = snapshot.docs.map((doc: any) => doc.data() as VillageEvent);
+    let fetchedEvents = snapshot.docs.map((doc: any) => doc.data() as VillageEvent);
+    fetchedEvents.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
+    events = fetchedEvents;
   } catch (error) {
     console.error('Error fetching events:', error);
   }

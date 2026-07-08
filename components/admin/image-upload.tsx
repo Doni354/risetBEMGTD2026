@@ -68,7 +68,7 @@ export default function ImageUpload({ idToken, value, onChange, label = 'Gambar'
             style={{ backgroundImage: `url(${value})` }}
           />
           {/* Main Image */}
-          <img src={value} alt="Preview" className="relative z-10 w-full h-full object-contain drop-shadow-lg" />
+          <img src={value} alt="Preview" className="absolute inset-0 w-full h-full object-contain drop-shadow-lg z-10 p-2" />
           
           <button
             type="button"
