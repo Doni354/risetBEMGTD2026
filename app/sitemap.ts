@@ -1,6 +1,5 @@
 import { MetadataRoute } from 'next';
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://risetbemgtd2026.vercel.app';
+import { siteUrl } from '@/lib/utils';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [

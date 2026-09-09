@@ -7,6 +7,7 @@ import { MOCK_VILLAGE_PROFILE, MOCK_PRODUCTS } from '@/lib/firebase/mock-data';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { adminDb } from '@/lib/firebase/admin';
+import { siteUrl } from '@/lib/utils';
 
 export const revalidate = 3600;
 
@@ -594,7 +595,6 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error('Error fetching village profile for metadata:', error);
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://risetbemgtd2026.vercel.app';
   const title = `${profile.villageName} — Portal Resmi & Marketplace`;
   const description = profile.description?.slice(0, 160) || 'Portal resmi Desa Dlemer, Kecamatan Kwanyar, Kabupaten Bangkalan, Madura.';
 
