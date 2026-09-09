@@ -1,6 +1,6 @@
-# Desa Kwanyar - Village Profile & Marketplace CMS
+# Desa Dlemer - Village Profile & Marketplace CMS
 
-Portal resmi profil desa dan marketplace produk unggulan **Desa Kwanyar**, Kecamatan Kwanyar, Kabupaten Bangkalan, Madura, Jawa Timur.
+Portal resmi profil desa dan marketplace produk unggulan **Desa Dlemer**, Kecamatan Kwanyar, Kabupaten Bangkalan, Madura, Jawa Timur.
 
 ## Tech Stack
 
@@ -91,7 +91,7 @@ lib/
 │   ├── admin.ts          # Admin SDK init (lazy)
 │   ├── utils.ts          # Firestore utilities
 │   ├── verify-admin.ts   # Token verification
-│   └── mock-data.ts      # Fallback data Desa Kwanyar
+│   └── mock-data.ts      # Fallback data Desa Dlemer
 hooks/
 └── useAuth.ts            # React auth hook
 ```

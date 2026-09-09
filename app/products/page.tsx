@@ -69,7 +69,7 @@ export default function ProductsPage() {
         <section className="bg-[#1B4332] text-white py-16 px-4">
           <div className="max-w-6xl mx-auto text-center">
             <span className="text-[#C9A84C] font-semibold text-sm tracking-wider uppercase">Marketplace</span>
-            <h1 className="text-3xl md:text-4xl font-bold mt-2">Produk Desa Kwanyar</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mt-2">Produk Desa Dlemer</h1>
             <p className="text-white/60 mt-3 max-w-lg mx-auto text-sm">
               Dukung ekonomi warga dengan membeli produk lokal berkualitas langsung dari desa
             </p>
