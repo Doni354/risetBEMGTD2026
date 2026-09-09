@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://riset-bem-gtd-2026.vercel.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://risetbemgtd2026.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  verification: {
+    google: 'google3e59652797569c9a',
+  },
   title: {
     default: 'Desa Dlemer — Portal Resmi & Marketplace',
     template: '%s | Desa Dlemer, Kwanyar Bangkalan',

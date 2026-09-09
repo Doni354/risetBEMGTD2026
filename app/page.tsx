@@ -594,7 +594,7 @@ export async function generateMetadata(): Promise<Metadata> {
     console.error('Error fetching village profile for metadata:', error);
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://riset-bem-gtd-2026.vercel.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://risetbemgtd2026.vercel.app';
   const title = `${profile.villageName} — Portal Resmi & Marketplace`;
   const description = profile.description?.slice(0, 160) || 'Portal resmi Desa Dlemer, Kecamatan Kwanyar, Kabupaten Bangkalan, Madura.';
 
