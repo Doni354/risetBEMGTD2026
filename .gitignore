@@ -5,18 +5,21 @@ __v0_jsx-dev-runtime.ts
 .snowflake/
 .v0-trash/
 .vercel/
-
-# Environment variables
-.env*.local
-
 # Common ignores
 node_modules
 .next/
 .DS_Store
 .vercel
-.env*
+
+# Environment variables
+.env*.local
+.env
+.env.production
+.env.development
+!.env.example
 
 # Firebase secrets
 service_account_KEY.json
 .firebase
 firebase-debug*.log
+node_modules
