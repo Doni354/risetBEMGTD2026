@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges, isSuperAdmin } from '@/lib/firebase/verify-admin';
 import { adminDb } from '@/lib/firebase/admin';
 import { VillageEvent } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -58,6 +62,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       } else if (updatedFields.imageUrl && !updatedFields.images) {
         updatedFields.images = [updatedFields.imageUrl];
       }
+      if ('endDate' in data) {
+        updatedFields.endDate = data.endDate ? Number(data.endDate) : null;
+      }
       updateData = { ...updatedFields, updatedAt: Date.now() };
     } else {
       // Restricted — hanya boleh approve/reject
@@ -70,6 +77,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     await adminDb.collection('events').doc(id).update(updateData);
+    revalidatePath('/');
+    revalidatePath('/events');
+    revalidatePath(`/events/${id}`);
     return NextResponse.json({ message: 'Event updated successfully', id });
   } catch (error) {
     console.error('[API] Error updating event:', error);
@@ -91,6 +101,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params;
     await adminDb.collection('events').doc(id).delete();
+    revalidatePath('/');
+    revalidatePath('/events');
+    revalidatePath(`/events/${id}`);
 
     return NextResponse.json({ message: 'Event deleted successfully', id });
   } catch (error) {

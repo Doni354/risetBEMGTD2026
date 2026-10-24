@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/admin';
 import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges } from '@/lib/firebase/verify-admin';
 import { Product } from '@/lib/types';
 import { MOCK_PRODUCTS } from '@/lib/firebase/mock-data';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
  * GET /api/products
@@ -98,6 +102,9 @@ export async function POST(request: NextRequest) {
     };
 
     await adminDb.collection('products').doc(productId).set(product);
+
+    revalidatePath('/');
+    revalidatePath('/products');
 
     return NextResponse.json({ message: 'Product created successfully', id: productId, product }, { status: 201 });
   } catch (error) {

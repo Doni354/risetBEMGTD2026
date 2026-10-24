@@ -16,7 +16,7 @@ interface EventFormProps {
 const CATEGORIES: EventCategory[] = ['Keagamaan', 'Olahraga', 'Kebudayaan', 'Pendidikan', 'Sosial', 'Pemerintahan', 'Lainnya'];
 
 export default function EventForm({ idToken, initialData, onSuccess, onCancel }: EventFormProps) {
-  const toDatetimeLocal = (ts?: number) => {
+  const toDatetimeLocal = (ts?: number | null) => {
     if (!ts) return '';
     const d = new Date(ts);
     return d.toISOString().slice(0, 16);
@@ -64,7 +64,7 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
         imageUrl: images[0] || formData.imageUrl || '',
         images,
         date: new Date(formData.date).getTime(),
-        endDate: formData.endDate ? new Date(formData.endDate).getTime() : undefined,
+        endDate: formData.endDate ? new Date(formData.endDate).getTime() : null,
       };
 
       const method = initialData ? 'PATCH' : 'POST';
@@ -145,7 +145,20 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
             <input type="datetime-local" name="date" value={formData.date} onChange={handleChange} required className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Tanggal & Waktu Selesai</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-medium text-gray-700">
+                Tanggal & Waktu Selesai <span className="text-xs font-normal text-gray-400">(Opsional)</span>
+              </label>
+              {formData.endDate && (
+                <button
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, endDate: '' }))}
+                  className="text-[11px] text-red-500 hover:underline"
+                >
+                  Hapus
+                </button>
+              )}
+            </div>
             <input type="datetime-local" name="endDate" value={formData.endDate} onChange={handleChange} className={inputClass} />
           </div>
           <div className="md:col-span-2">

@@ -61,7 +61,7 @@ export interface VillageEvent {
   description: string;
   location: string;
   date: number; // unix timestamp
-  endDate?: number;
+  endDate?: number | null;
   organizer: string; // nama penyelenggara
   category: EventCategory;
   imageUrl?: string;

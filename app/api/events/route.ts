@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { adminDb } from '@/lib/firebase/admin';
 import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges } from '@/lib/firebase/verify-admin';
 import { VillageEvent } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const EVENT_CATEGORIES = ['Keagamaan','Olahraga','Kebudayaan','Pendidikan','Sosial','Pemerintahan','Lainnya'];
 
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
       description: data.description,
       location: data.location,
       date: data.date,
-      endDate: data.endDate || undefined,
+      endDate: data.endDate ? Number(data.endDate) : null,
       organizer: data.organizer,
       category: data.category,
       imageUrl: images[0] || data.imageUrl || '',
@@ -78,6 +82,9 @@ export async function POST(request: NextRequest) {
     };
 
     await adminDb.collection('events').doc(eventId).set(event);
+
+    revalidatePath('/');
+    revalidatePath('/events');
 
     return NextResponse.json({ message: 'Event created successfully', id: eventId, event }, { status: 201 });
   } catch (error) {

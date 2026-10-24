@@ -8,7 +8,8 @@ import { CalendarDays, MapPin, User, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
@@ -122,7 +123,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                   <h4 className="text-sm text-gray-500 font-medium mb-1">Jam</h4>
                   <p className="font-bold text-gray-900">
                     {new Date(event.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB 
-                    {event.endDate && ` - ${new Date(event.endDate).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`}
+                    {event.endDate ? ` - ${new Date(event.endDate).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB` : ' s.d. Selesai'}
                   </p>
                 </div>
               </div>

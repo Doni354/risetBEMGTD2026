@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges, isSuperAdmin } from '@/lib/firebase/verify-admin';
 import { adminDb } from '@/lib/firebase/admin';
 import { Product } from '@/lib/types';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -82,6 +86,9 @@ export async function PATCH(
     }
 
     await adminDb.collection('products').doc(id).update(updateData);
+    revalidatePath('/');
+    revalidatePath('/products');
+    revalidatePath(`/products/${id}`);
     return NextResponse.json({ message: 'Product updated successfully', id });
   } catch (error) {
     console.error('[API] Error updating product:', error);
@@ -107,6 +114,9 @@ export async function DELETE(
 
     const { id } = await params;
     await adminDb.collection('products').doc(id).delete();
+    revalidatePath('/');
+    revalidatePath('/products');
+    revalidatePath(`/products/${id}`);
 
     return NextResponse.json({ message: 'Product deleted successfully', id });
   } catch (error) {

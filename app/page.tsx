@@ -9,12 +9,12 @@ import Footer from '@/components/footer';
 import { adminDb } from '@/lib/firebase/admin';
 import { siteUrl } from '@/lib/utils';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 /**
  * Homepage Desa Dlemer
  * Sections: Hero, Tentang, Statistik, Potensi Unggulan, Acara, Produk Preview, Kontak
- * Menggunakan ISR (revalidate 1 jam) untuk efisiensi Firestore reads.
  */
 async function HomePage() {
   let profile = MOCK_VILLAGE_PROFILE;
@@ -32,7 +32,7 @@ async function HomePage() {
       .get();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let fetchedEvents = eventsSnap.docs.map((doc: any) => doc.data() as VillageEvent);
+    let fetchedEvents = eventsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }) as VillageEvent);
     fetchedEvents.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
     events = fetchedEvents.slice(0, 3);
 

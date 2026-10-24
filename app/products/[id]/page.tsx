@@ -8,7 +8,8 @@ import { ShoppingBag, ArrowLeft, MessageCircle, PackageOpen } from 'lucide-react
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const resolvedParams = await params;

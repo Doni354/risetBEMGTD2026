@@ -32,7 +32,7 @@ export default function ProductsPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/products?page=${page}`);
+        const response = await fetch(`/api/products?page=${page}`, { cache: 'no-store' });
         const data: ProductsResponse = await response.json();
 
         if (page === 1) {

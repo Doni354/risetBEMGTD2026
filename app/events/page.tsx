@@ -6,7 +6,8 @@ import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { CalendarDays, MapPin } from 'lucide-react';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: 'Acara & Agenda Desa',
@@ -22,7 +23,7 @@ export default async function EventsPage() {
       .get();
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let fetchedEvents = snapshot.docs.map((doc: any) => doc.data() as VillageEvent);
+    let fetchedEvents = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }) as VillageEvent);
     fetchedEvents.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
     events = fetchedEvents;
   } catch (error) {
