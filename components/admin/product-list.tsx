@@ -103,15 +103,23 @@ export default function ProductList({
         const canEdit = isEditable(product);
         const ownedByCurrent = product.createdBy === adminId;
         const phoneDisplay = cleanDisplayPhone(product.whatsappLink);
+        const allImages = Array.isArray(product.images) && product.images.length > 0 ? product.images : (product.imageUrl ? [product.imageUrl] : []);
+        const coverImage = allImages[0] || product.imageUrl;
+        const numPhotos = allImages.length;
 
         return (
           <div key={product.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row items-start gap-4 hover:shadow-md transition-all">
             {/* Image */}
-            <div className="flex-shrink-0">
-              {product.imageUrl ? (
-                <img src={product.imageUrl} alt={product.name} className="w-20 h-20 rounded-xl object-cover border border-gray-100" />
+            <div className="flex-shrink-0 relative">
+              {coverImage ? (
+                <img src={coverImage} alt={product.name} className="w-20 h-20 rounded-xl object-cover border border-gray-100" />
               ) : (
                 <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center text-2xl">🛍️</div>
+              )}
+              {numPhotos > 1 && (
+                <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md backdrop-blur-xs shadow-sm" title={`${numPhotos} Foto`}>
+                  📷 {numPhotos}
+                </span>
               )}
             </div>
 

@@ -86,17 +86,25 @@ export default function EventList({
       {events.map((event) => {
         const fb = feedback?.id === event.id ? feedback : null;
         const owned = isOwned(event);
+        const allImages = Array.isArray(event.images) && event.images.length > 0 ? event.images : (event.imageUrl ? [event.imageUrl] : []);
+        const coverImage = allImages[0] || event.imageUrl;
+        const numPhotos = allImages.length;
 
         return (
           <div key={event.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-start gap-4 hover:shadow-sm transition-shadow">
             {/* Image / Icon */}
-            <div className="flex-shrink-0">
-              {event.imageUrl ? (
-                <img src={event.imageUrl} alt={event.title} className="w-16 h-16 rounded-xl object-cover" />
+            <div className="flex-shrink-0 relative">
+              {coverImage ? (
+                <img src={coverImage} alt={event.title} className="w-16 h-16 rounded-xl object-cover" />
               ) : (
                 <div className="w-16 h-16 rounded-xl bg-purple-50 flex items-center justify-center">
                   <CalendarDays className="w-7 h-7 text-purple-300" />
                 </div>
+              )}
+              {numPhotos > 1 && (
+                <span className="absolute bottom-1 right-1 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-md backdrop-blur-xs shadow-sm" title={`${numPhotos} Foto`}>
+                  📷 {numPhotos}
+                </span>
               )}
             </div>
 

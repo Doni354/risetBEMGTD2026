@@ -3,7 +3,7 @@
 import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
-import { Product } from '@/lib/types';
+import { Product, getItemImages } from '@/lib/types';
 import { MessageCircle, ShoppingBag } from 'lucide-react';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
@@ -117,21 +117,33 @@ export default function ProductsPage() {
             ) : filteredProducts.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {filteredProducts.map((product) => (
-                    <Link
-                      href={`/products/${product.id}`}
-                      key={product.id}
-                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group relative block"
-                    >
-                      {product.imageUrl && (
-                        <div className="h-52 overflow-hidden">
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                        </div>
-                      )}
+                  {filteredProducts.map((product) => {
+                    const productImages = getItemImages(product);
+                    const cover = productImages[0] || product.imageUrl;
+                    return (
+                      <Link
+                        href={`/products/${product.id}`}
+                        key={product.id}
+                        className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group relative block"
+                      >
+                        {cover ? (
+                          <div className="h-52 overflow-hidden relative">
+                            <img
+                              src={cover}
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            {productImages.length > 1 && (
+                              <span className="absolute bottom-2.5 right-2.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                                📷 {productImages.length} Foto
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="h-52 bg-gray-100 flex items-center justify-center text-4xl">
+                            🛍️
+                          </div>
+                        )}
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-2">
                           <div>
@@ -174,7 +186,8 @@ export default function ProductsPage() {
                         </div>
                       </div>
                     </Link>
-                  ))}
+                  );
+                })}
                 </div>
 
                 {hasMore && (

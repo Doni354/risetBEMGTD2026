@@ -63,7 +63,14 @@ export async function PATCH(
 
     if (existing.createdBy === admin.id || isSuperAdmin(admin)) {
       // Full edit — produk buatan admin ini sendiri atau Super Admin
-      updateData = { ...data, updatedAt: Date.now() };
+      const updatedFields = { ...data };
+      if (Array.isArray(updatedFields.images)) {
+        updatedFields.images = updatedFields.images.filter((img: unknown) => typeof img === 'string' && img.trim().length > 0);
+        updatedFields.imageUrl = updatedFields.images[0] || updatedFields.imageUrl || '';
+      } else if (updatedFields.imageUrl && !updatedFields.images) {
+        updatedFields.images = [updatedFields.imageUrl];
+      }
+      updateData = { ...updatedFields, updatedAt: Date.now() };
     } else {
       // Restricted — hanya bisa approve/reject (data warga)
       updateData = {

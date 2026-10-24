@@ -77,12 +77,17 @@ export async function POST(request: NextRequest) {
     }
 
     const productId = `product_${Date.now()}`;
+    const images: string[] = Array.isArray(data.images)
+      ? data.images.filter((img: unknown) => typeof img === 'string' && img.trim().length > 0)
+      : (data.imageUrl ? [data.imageUrl] : []);
+
     const product: Product = {
       id: productId,
       name: data.name,
       description: data.description,
       price: parseFloat(data.price),
-      imageUrl: data.imageUrl || '',
+      imageUrl: images[0] || data.imageUrl || '',
+      images,
       category: data.category,
       stock: parseInt(data.stock) || 0,
       whatsappLink: data.whatsappLink,

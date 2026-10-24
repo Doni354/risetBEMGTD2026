@@ -63,6 +63,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Kerupuk udang khas Madura yang renyah dan gurih, dibuat dari udang segar pilihan. Diproses secara tradisional tanpa pengawet, cocok untuk oleh-oleh dan konsumsi sehari-hari.',
     price: 35000,
     imageUrl: '/kerupuk_udang.png',
+    images: ['/kerupuk_udang.png', '/petis_udang.png', '/dlemer_hero.jpg'],
     category: 'Makanan & Minuman',
     stock: 50,
     whatsappLink:
@@ -79,6 +80,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Petis udang asli Madura dengan cita rasa gurih dan manis yang khas. Terbuat dari sari udang pilihan, cocok untuk pelengkap rujak, nasi pecel, dan masakan khas Madura.',
     price: 25000,
     imageUrl: '/petis_udang.png',
+    images: ['/petis_udang.png', '/kerupuk_udang.png'],
     category: 'Makanan & Minuman',
     stock: 30,
     whatsappLink:
@@ -95,6 +97,7 @@ export const MOCK_PRODUCTS: Product[] = [
       'Batik tulis khas Madura dengan motif tradisional yang kaya warna. Dibuat dengan tangan oleh pengrajin lokal Desa Dlemer menggunakan pewarna alami dan malam berkualitas.',
     price: 185000,
     imageUrl: '/madura_batik.png',
+    images: ['/madura_batik.png', '/madura_keris.png', '/aeng_tongtong_hero.png'],
     category: 'Kerajinan',
     stock: 15,
     whatsappLink:

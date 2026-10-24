@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { VillageEvent, EventCategory } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import ImageUpload from './image-upload';
+import MultiImageUpload from './multi-image-upload';
 
 interface EventFormProps {
   idToken: string | null;
@@ -22,6 +22,10 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
     return d.toISOString().slice(0, 16);
   };
 
+  const initialImages: string[] = initialData?.images?.length
+    ? initialData.images
+    : (initialData?.imageUrl ? [initialData.imageUrl] : []);
+
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -31,6 +35,7 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
     date: toDatetimeLocal(initialData?.date),
     endDate: toDatetimeLocal(initialData?.endDate),
     imageUrl: initialData?.imageUrl || '',
+    images: initialImages,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,8 +58,11 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
       setLoading(true);
       setError(null);
 
+      const images = formData.images || [];
       const payload = {
         ...formData,
+        imageUrl: images[0] || formData.imageUrl || '',
+        images,
         date: new Date(formData.date).getTime(),
         endDate: formData.endDate ? new Date(formData.endDate).getTime() : undefined,
       };
@@ -103,11 +111,18 @@ export default function EventForm({ idToken, initialData, onSuccess, onCancel }:
         {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">⚠ {error}</div>}
         {success && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">✓ Acara berhasil disimpan!</div>}
 
-        <ImageUpload
+        <MultiImageUpload
           idToken={idToken}
-          value={formData.imageUrl}
-          onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
-          label="Foto Acara"
+          value={formData.images || (formData.imageUrl ? [formData.imageUrl] : [])}
+          onChange={(urls) =>
+            setFormData((prev) => ({
+              ...prev,
+              images: urls,
+              imageUrl: urls[0] || '',
+            }))
+          }
+          label="Foto & Pamflet / Dokumentasi Acara"
+          description="Bisa upload lebih dari 1 foto (pamflet, rundown, foto lokasi, atau dokumentasi). Foto pertama menjadi cover utama."
         />
 
         <div className="grid md:grid-cols-2 gap-4">

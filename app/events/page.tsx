@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { adminDb } from '@/lib/firebase/admin';
-import { VillageEvent } from '@/lib/types';
+import { VillageEvent, getItemImages } from '@/lib/types';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { CalendarDays, MapPin } from 'lucide-react';
@@ -51,11 +51,14 @@ export default async function EventsPage() {
         {/* Content */}
         <div className="max-w-6xl mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.length > 0 ? events.map((event) => (
+            {events.length > 0 ? events.map((event) => {
+              const eventImages = getItemImages(event);
+              const cover = eventImages[0] || event.imageUrl;
+              return (
               <Link key={event.id} href={`/events/${event.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group flex flex-col block">
                 <div className="relative h-56 overflow-hidden bg-gray-100 flex-shrink-0">
-                  {event.imageUrl ? (
-                    <img src={event.imageUrl} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  {cover ? (
+                    <img src={cover} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-[#1B4332]/5">
                       <CalendarDays className="w-12 h-12 text-[#1B4332]/20" />
@@ -64,6 +67,11 @@ export default async function EventsPage() {
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur text-[#1B4332] text-xs font-bold px-3 py-1.5 rounded-full shadow-sm">
                     {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </div>
+                  {eventImages.length > 1 && (
+                    <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                      📷 {eventImages.length} Foto
+                    </div>
+                  )}
                 </div>
                 <div className="p-6 flex flex-col flex-1">
                   <div className="flex items-center gap-2 text-xs text-[#C9A84C] font-semibold mb-2 uppercase tracking-wide">
@@ -84,7 +92,8 @@ export default async function EventsPage() {
                   </div>
                 </div>
               </Link>
-            )) : (
+              );
+            }) : (
               <div className="col-span-full py-16 px-4 bg-white rounded-3xl border border-gray-100 shadow-sm text-center max-w-lg mx-auto">
                 <CalendarDays className="w-14 h-14 text-[#C9A84C] mx-auto mb-3" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Belum Ada Agenda Terjadwal</h3>

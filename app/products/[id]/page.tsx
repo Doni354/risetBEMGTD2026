@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase/admin';
-import { Product } from '@/lib/types';
+import { Product, getItemImages } from '@/lib/types';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+import MediaGallery from '@/components/media-gallery';
 import { ShoppingBag, ArrowLeft, MessageCircle, PackageOpen } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -34,6 +35,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     // Hide unapproved products from public
     notFound();
   }
+
+  const productImages = getItemImages(product);
 
   // 2. Fetch related products
   let relatedProducts: Product[] = [];
@@ -73,17 +76,13 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div className="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
           <div className="bg-white rounded-3xl p-6 md:p-10 shadow-lg border border-gray-100 mb-16 flex flex-col md:flex-row gap-10">
             
-            {/* Left: Image */}
+            {/* Left: Image Gallery */}
             <div className="w-full md:w-1/2 flex-shrink-0">
-               <div className="rounded-2xl overflow-hidden bg-gray-100 border border-gray-100 aspect-square relative">
-                 {product.imageUrl ? (
-                   <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                 ) : (
-                   <div className="w-full h-full flex items-center justify-center bg-[#1B4332]/5">
-                     <ShoppingBag className="w-16 h-16 text-[#1B4332]/20" />
-                   </div>
-                 )}
-               </div>
+              <MediaGallery
+                images={productImages}
+                title={product.name}
+                aspectRatio="square"
+              />
             </div>
 
             {/* Right: Info */}
@@ -135,31 +134,40 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             <div className="mb-16">
               <h3 className="text-2xl font-bold text-gray-900 mb-8">Produk Pilihan Lainnya</h3>
               <div className="grid md:grid-cols-3 gap-6">
-                {relatedProducts.map((rel) => (
-                  <Link
-                    href={`/products/${rel.id}`}
-                    key={rel.id}
-                    className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group relative block"
-                  >
-                    {rel.imageUrl && (
-                      <div className="h-52 overflow-hidden">
-                        <img
-                          src={rel.imageUrl}
-                          alt={rel.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                {relatedProducts.map((rel) => {
+                  const relImages = getItemImages(rel);
+                  const relCover = relImages[0] || rel.imageUrl;
+                  return (
+                    <Link
+                      href={`/products/${rel.id}`}
+                      key={rel.id}
+                      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all group relative block"
+                    >
+                      {relCover && (
+                        <div className="h-52 overflow-hidden relative">
+                          <img
+                            src={relCover}
+                            alt={rel.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          {relImages.length > 1 && (
+                            <span className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                              📷 {relImages.length} Foto
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-gray-900 group-hover:text-[#1B4332] transition-colors">{rel.name}</h3>
+                        </div>
+                        <p className="text-xl font-bold text-[#1B4332] mt-4">
+                          Rp {rel.price.toLocaleString('id-ID')}
+                        </p>
                       </div>
-                    )}
-                    <div className="p-5">
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-bold text-gray-900 group-hover:text-[#1B4332] transition-colors">{rel.name}</h3>
-                      </div>
-                      <p className="text-xl font-bold text-[#1B4332] mt-4">
-                        Rp {rel.price.toLocaleString('id-ID')}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

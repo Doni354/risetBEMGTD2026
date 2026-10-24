@@ -42,6 +42,7 @@ export interface Product {
   description: string;
   price: number;
   imageUrl?: string;
+  images?: string[]; // Array of image URLs
   category: string;
   stock: number;
   whatsappLink: string;
@@ -64,12 +65,25 @@ export interface VillageEvent {
   organizer: string; // nama penyelenggara
   category: EventCategory;
   imageUrl?: string;
+  images?: string[]; // Array of image URLs
   approved: boolean;
   createdBy: string; // uid admin or 'warga:{phone}'
   approvedBy?: string;
   approvedAt?: number;
   createdAt: number;
   updatedAt: number;
+}
+
+/** Helper utility to extract all images from an item safely */
+export function getItemImages(item?: { images?: string[]; imageUrl?: string } | null): string[] {
+  if (!item) return [];
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return item.images.filter((img): img is string => typeof img === 'string' && img.trim().length > 0);
+  }
+  if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim().length > 0) {
+    return [item.imageUrl.trim()];
+  }
+  return [];
 }
 
 export type EventCategory =

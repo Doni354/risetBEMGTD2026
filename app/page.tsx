@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Users, Home, Ruler, ArrowRight, Calendar, ExternalLink, ShoppingBag } from 'lucide-react';
-import { VillageEvent, Product } from '@/lib/types';
+import { VillageEvent, Product, getItemImages } from '@/lib/types';
 import { MOCK_VILLAGE_PROFILE } from '@/lib/firebase/mock-data';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
@@ -377,47 +377,58 @@ async function HomePage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {events.length > 0 ? events.map((event) => (
-                <Link
-                  key={event.id}
-                  href={`/events/${event.id}`}
-                  className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 hover:border-[#1B4332]/15 transition-all duration-500 group block hover:-translate-y-1"
-                >
-                  <div className="relative h-52 overflow-hidden bg-gradient-to-br from-[#1B4332]/10 to-[#C9A84C]/10">
-                    {event.imageUrl ? (
-                      <Image
-                        src={event.imageUrl}
-                        alt={event.title}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-700"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-5xl opacity-30">📅</span>
+              {events.length > 0 ? events.map((event) => {
+                const eventImages = getItemImages(event);
+                const cover = eventImages[0] || event.imageUrl;
+                return (
+                  <Link
+                    key={event.id}
+                    href={`/events/${event.id}`}
+                    className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 hover:border-[#1B4332]/15 transition-all duration-500 group block hover:-translate-y-1"
+                  >
+                    <div className="relative h-52 overflow-hidden bg-gradient-to-br from-[#1B4332]/10 to-[#C9A84C]/10">
+                      {cover ? (
+                        <Image
+                          src={cover}
+                          alt={event.title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-5xl opacity-30">📅</span>
+                        </div>
+                      )}
+                      {/* Date badge */}
+                      <div className="absolute top-4 left-4 bg-white text-[#1B4332] text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                        {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
-                    )}
-                    {/* Date badge */}
-                    <div className="absolute top-4 left-4 bg-white text-[#1B4332] text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                      {new Date(event.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {/* Category & Photo count badge */}
+                      <div className="absolute top-4 right-4 flex items-center gap-1.5">
+                        {eventImages.length > 1 && (
+                          <span className="bg-black/60 backdrop-blur-md text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+                            📷 {eventImages.length}
+                          </span>
+                        )}
+                        <span className="bg-[#1B4332] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
+                          {event.category}
+                        </span>
+                      </div>
                     </div>
-                    {/* Category badge */}
-                    <div className="absolute top-4 right-4 bg-[#1B4332] text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                      {event.category}
+                    <div className="p-6">
+                      <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-[#1B4332] transition-colors leading-snug">
+                        {event.title}
+                      </h3>
+                      <p className="text-gray-500 text-sm line-clamp-2 mb-4 leading-relaxed">{event.description}</p>
+                      <div className="flex items-center gap-2 text-xs text-gray-400">
+                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="truncate">{event.location}</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-[#1B4332] transition-colors leading-snug">
-                      {event.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm line-clamp-2 mb-4 leading-relaxed">{event.description}</p>
-                    <div className="flex items-center gap-2 text-xs text-gray-400">
-                      <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span className="truncate">{event.location}</span>
-                    </div>
-                  </div>
-                </Link>
-              )) : (
+                  </Link>
+                );
+              }) : (
                 <div className="col-span-full">
                   <div className="text-center py-16 bg-[#FAFAF8] rounded-3xl border-2 border-dashed border-gray-200">
                     <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -480,48 +491,57 @@ async function HomePage() {
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.id}`}
-                    className="group bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-white/8 hover:border-[#C9A84C]/40 hover:bg-white/10 transition-all duration-500 shadow-xl block hover:-translate-y-1"
-                  >
-                    {product.imageUrl ? (
-                      <div className="h-52 overflow-hidden relative">
-                        <Image
-                          src={product.imageUrl}
-                          alt={product.name}
-                          fill
-                          className="object-cover group-hover:scale-110 transition-transform duration-700"
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                        <div className="absolute bottom-3 left-3 text-[10px] font-bold text-white bg-black/40 backdrop-blur px-2.5 py-1 rounded-full">
-                          {product.category}
+                {products.map((product) => {
+                  const productImages = getItemImages(product);
+                  const cover = productImages[0] || product.imageUrl;
+                  return (
+                    <Link
+                      key={product.id}
+                      href={`/products/${product.id}`}
+                      className="group bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-white/8 hover:border-[#C9A84C]/40 hover:bg-white/10 transition-all duration-500 shadow-xl block hover:-translate-y-1"
+                    >
+                      {cover ? (
+                        <div className="h-52 overflow-hidden relative">
+                          <Image
+                            src={cover}
+                            alt={product.name}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                          <div className="absolute bottom-3 left-3 text-[10px] font-bold text-white bg-black/40 backdrop-blur px-2.5 py-1 rounded-full">
+                            {product.category}
+                          </div>
+                          {productImages.length > 1 && (
+                            <div className="absolute bottom-3 right-3 text-[10px] font-semibold text-white bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                              📷 {productImages.length} Foto
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="h-52 bg-white/10 flex items-center justify-center text-4xl">
+                          🛍️
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <h3 className="font-bold text-white text-base mb-2 group-hover:text-[#C9A84C] transition-colors">{product.name}</h3>
+                        <p className="text-white/40 text-sm line-clamp-2 mb-5 leading-relaxed">{product.description}</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-[10px] text-white/30 mb-0.5">Mulai dari</p>
+                            <p className="text-[#C9A84C] font-extrabold text-xl">
+                              Rp {product.price.toLocaleString('id-ID')}
+                            </p>
+                          </div>
+                          <div className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white group-hover:bg-[#C9A84C] group-hover:text-[#1B4332] transition-all duration-300 group-hover:scale-110">
+                            <ExternalLink className="w-4 h-4" />
+                          </div>
                         </div>
                       </div>
-                    ) : (
-                      <div className="h-52 bg-white/10 flex items-center justify-center text-4xl">
-                        🛍️
-                      </div>
-                    )}
-                    <div className="p-6">
-                      <h3 className="font-bold text-white text-base mb-2 group-hover:text-[#C9A84C] transition-colors">{product.name}</h3>
-                      <p className="text-white/40 text-sm line-clamp-2 mb-5 leading-relaxed">{product.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[10px] text-white/30 mb-0.5">Mulai dari</p>
-                          <p className="text-[#C9A84C] font-extrabold text-xl">
-                            Rp {product.price.toLocaleString('id-ID')}
-                          </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white group-hover:bg-[#C9A84C] group-hover:text-[#1B4332] transition-all duration-300 group-hover:scale-110">
-                          <ExternalLink className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  );
+                })}
               </div>
             )}
 

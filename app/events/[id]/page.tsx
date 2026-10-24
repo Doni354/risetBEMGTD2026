@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase/admin';
-import { VillageEvent } from '@/lib/types';
+import { VillageEvent, getItemImages } from '@/lib/types';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
+import MediaGallery from '@/components/media-gallery';
 import { CalendarDays, MapPin, User, Clock, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -35,6 +36,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
+  const eventImages = getItemImages(event);
+  const coverImage = eventImages[0] || event.imageUrl;
+
   // 2. Fetch related events
   let relatedEvents: VillageEvent[] = [];
   try {
@@ -60,9 +64,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       <main className="flex-1">
         {/* Cover / Hero */}
         <div className="relative w-full h-72 md:h-96 bg-gray-900 overflow-hidden">
-          {event.imageUrl ? (
+          {coverImage ? (
              <img 
-               src={event.imageUrl} 
+               src={coverImage} 
                alt={event.title} 
                className="w-full h-full object-cover opacity-60" 
              />
@@ -80,6 +84,11 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 <span className="px-3 py-1 bg-[#C9A84C] text-white rounded-full text-xs flex items-center font-bold tracking-wide uppercase shadow-sm">
                   {event.category}
                 </span>
+                {eventImages.length > 1 && (
+                  <span className="px-3 py-1 bg-white/20 backdrop-blur-md text-white rounded-full text-xs font-semibold shadow-sm flex items-center gap-1">
+                    📷 {eventImages.length} Foto
+                  </span>
+                )}
               </div>
               <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
                 {event.title}
@@ -136,6 +145,32 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
               ))}
             </div>
 
+            {/* Media Gallery / Dokumentasi & Pamflet Acara */}
+            {eventImages.length > 0 && (
+              <div className="mt-10 pt-10 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Galeri & Pamflet Acara
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Lihat foto dokumentasi, brosur, atau suasana acara
+                    </p>
+                  </div>
+                  {eventImages.length > 1 && (
+                    <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-100">
+                      {eventImages.length} Foto
+                    </span>
+                  )}
+                </div>
+                <MediaGallery
+                  images={eventImages}
+                  title={event.title}
+                  aspectRatio="video"
+                />
+              </div>
+            )}
+
             <div className="mt-12 pt-8 border-t border-gray-100 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                 <User className="w-6 h-6 text-gray-400" />
@@ -152,26 +187,37 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             <div className="mb-16">
               <h3 className="text-2xl font-bold text-gray-900 mb-8">Acara Terkait Lainnya</h3>
               <div className="grid md:grid-cols-3 gap-6">
-                {relatedEvents.map((rel) => (
-                  <Link key={rel.id} href={`/events/${rel.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group flex flex-col block">
-                    <div className="relative h-48 overflow-hidden bg-gray-100 flex-shrink-0">
-                      {rel.imageUrl ? (
-                        <img src={rel.imageUrl} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                         <div className="w-full h-full flex items-center justify-center bg-[#1B4332]/5">
-                            <CalendarDays className="w-8 h-8 text-[#1B4332]/20" />
-                         </div>
-                      )}
-                    </div>
-                    <div className="p-5 flex flex-col flex-1">
-                      <h4 className="font-bold text-gray-900 mb-2 group-hover:text-[#1B4332] transition-colors line-clamp-1">{rel.title}</h4>
-                      <p className="text-xs text-gray-500 text-sm mb-4 leading-relaxed line-clamp-2 flex-1">{rel.description}</p>
-                      <div className="pt-3 border-t border-gray-50 text-xs font-semibold text-[#1B4332]">
-                        {new Date(rel.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                {relatedEvents.map((rel) => {
+                  const relImages = getItemImages(rel);
+                  const relCover = relImages[0] || rel.imageUrl;
+                  return (
+                    <Link key={rel.id} href={`/events/${rel.id}`} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-[#1B4332]/20 transition-all duration-300 group flex flex-col block">
+                      <div className="relative h-48 overflow-hidden bg-gray-100 flex-shrink-0">
+                        {relCover ? (
+                          <>
+                            <img src={relCover} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            {relImages.length > 1 && (
+                              <span className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold px-2 py-0.5 rounded-full shadow-sm">
+                                📷 {relImages.length} Foto
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                           <div className="w-full h-full flex items-center justify-center bg-[#1B4332]/5">
+                              <CalendarDays className="w-8 h-8 text-[#1B4332]/20" />
+                           </div>
+                        )}
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                      <div className="p-5 flex flex-col flex-1">
+                        <h4 className="font-bold text-gray-900 mb-2 group-hover:text-[#1B4332] transition-colors line-clamp-1">{rel.title}</h4>
+                        <p className="text-xs text-gray-500 text-sm mb-4 leading-relaxed line-clamp-2 flex-1">{rel.description}</p>
+                        <div className="pt-3 border-t border-gray-50 text-xs font-semibold text-[#1B4332]">
+                          {new Date(rel.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

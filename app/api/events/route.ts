@@ -56,6 +56,10 @@ export async function POST(request: NextRequest) {
     }
 
     const eventId = `event_${Date.now()}`;
+    const images: string[] = Array.isArray(data.images)
+      ? data.images.filter((img: unknown) => typeof img === 'string' && img.trim().length > 0)
+      : (data.imageUrl ? [data.imageUrl] : []);
+
     const event: VillageEvent = {
       id: eventId,
       title: data.title,
@@ -65,7 +69,8 @@ export async function POST(request: NextRequest) {
       endDate: data.endDate || undefined,
       organizer: data.organizer,
       category: data.category,
-      imageUrl: data.imageUrl || '',
+      imageUrl: images[0] || data.imageUrl || '',
+      images,
       approved: true, // auto-approve jika dibuat admin
       createdBy: admin.id,
       createdAt: Date.now(),

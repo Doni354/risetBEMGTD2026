@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Product } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Loader2, Phone, Sparkles } from 'lucide-react';
-import ImageUpload from './image-upload';
+import MultiImageUpload from './multi-image-upload';
 
 interface ProductFormProps {
   idToken: string | null;
@@ -48,8 +48,14 @@ function formatPhoneToWaLink(phone: string): string {
 }
 
 export default function ProductForm({ idToken, initialData, onSuccess, onCancel }: ProductFormProps) {
-  const [formData, setFormData] = useState<Partial<Product>>(
-    initialData || { name: '', description: '', price: 0, category: 'Lainnya', stock: 0, whatsappLink: '', imageUrl: '' }
+  const initialImages: string[] = initialData?.images?.length
+    ? initialData.images
+    : (initialData?.imageUrl ? [initialData.imageUrl] : []);
+
+  const [formData, setFormData] = useState<Partial<Product> & { images?: string[] }>(
+    initialData
+      ? { ...initialData, images: initialImages }
+      : { name: '', description: '', price: 0, category: 'Lainnya', stock: 0, whatsappLink: '', imageUrl: '', images: [] }
   );
   const [waPhone, setWaPhone] = useState(extractPhoneFromWaLink(initialData?.whatsappLink) || '');
   const [loading, setLoading] = useState(false);
@@ -88,8 +94,11 @@ export default function ProductForm({ idToken, initialData, onSuccess, onCancel 
       setLoading(true);
       setError(null);
 
+      const images = formData.images || [];
       const payload = {
         ...formData,
+        imageUrl: images[0] || formData.imageUrl || '',
+        images,
         whatsappLink: finalWaLink,
       };
 
@@ -151,12 +160,19 @@ export default function ProductForm({ idToken, initialData, onSuccess, onCancel 
           </div>
         )}
 
-        {/* Image Upload */}
-        <ImageUpload
+        {/* Multi-Image Upload */}
+        <MultiImageUpload
           idToken={idToken}
-          value={formData.imageUrl}
-          onChange={(url) => setFormData((prev) => ({ ...prev, imageUrl: url }))}
+          value={formData.images || (formData.imageUrl ? [formData.imageUrl] : [])}
+          onChange={(urls) =>
+            setFormData((prev) => ({
+              ...prev,
+              images: urls,
+              imageUrl: urls[0] || '',
+            }))
+          }
           label="Foto Produk"
+          description="Bisa upload lebih dari 1 foto produk. Foto pertama akan otomatis menjadi foto utama (cover)."
         />
 
         <div className="grid md:grid-cols-2 gap-4">

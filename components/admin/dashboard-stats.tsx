@@ -115,10 +115,12 @@ export default function DashboardStats({ idToken }: DashboardStatsProps) {
             {pendingProducts.length === 0 ? (
               <p className="px-5 py-6 text-sm text-gray-400 text-center">Tidak ada produk pending ✓</p>
             ) : (
-              pendingProducts.map((p) => (
+              pendingProducts.map((p) => {
+                const cover = (Array.isArray(p.images) && p.images[0]) || p.imageUrl;
+                return (
                 <div key={p.id} className="px-5 py-3 flex items-center gap-3">
-                  {p.imageUrl ? (
-                    <img src={p.imageUrl} alt={p.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                  {cover ? (
+                    <img src={cover} alt={p.name} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
                   ) : (
                     <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
                       <ShoppingBag className="w-4 h-4 text-gray-300" />
@@ -130,7 +132,8 @@ export default function DashboardStats({ idToken }: DashboardStatsProps) {
                   </div>
                   <span className="text-xs bg-amber-50 text-amber-600 px-2 py-1 rounded-lg flex-shrink-0">Pending</span>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -150,18 +153,25 @@ export default function DashboardStats({ idToken }: DashboardStatsProps) {
             {pendingEvents.length === 0 ? (
               <p className="px-5 py-6 text-sm text-gray-400 text-center">Tidak ada acara pending ✓</p>
             ) : (
-              pendingEvents.map((e) => (
+              pendingEvents.map((e) => {
+                const cover = (Array.isArray(e.images) && e.images[0]) || e.imageUrl;
+                return (
                 <div key={e.id} className="px-5 py-3 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
-                    <CalendarDays className="w-4 h-4 text-purple-400" />
-                  </div>
+                  {cover ? (
+                    <img src={cover} alt={e.title} className="w-9 h-9 rounded-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-purple-50 flex items-center justify-center flex-shrink-0">
+                      <CalendarDays className="w-4 h-4 text-purple-400" />
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-800 truncate">{e.title}</p>
                     <p className="text-xs text-gray-400">{e.category} · {e.organizer}</p>
                   </div>
                   <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-lg flex-shrink-0">Pending</span>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
