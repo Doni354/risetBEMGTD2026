@@ -88,6 +88,7 @@ export default function Footer() {
               <Link href="/" className="block text-sm text-white/50 hover:text-white hover:translate-x-1 transition-all duration-200">Beranda</Link>
               <Link href="/events" className="block text-sm text-white/50 hover:text-white hover:translate-x-1 transition-all duration-200">Acara & Kegiatan</Link>
               <Link href="/products" className="block text-sm text-white/50 hover:text-white hover:translate-x-1 transition-all duration-200">Produk Desa</Link>
+              <Link href="/app" className="block text-sm text-white/50 hover:text-white hover:translate-x-1 transition-all duration-200">Unduh Aplikasi Warga</Link>
               <Link href="/login" className="block text-sm text-white/50 hover:text-white hover:translate-x-1 transition-all duration-200">Admin Login</Link>
             </div>
           </div>

@@ -85,15 +85,26 @@ export default async function EventsPage() {
                 </div>
               </Link>
             )) : (
-              <div className="col-span-full py-20 bg-white rounded-3xl border border-dashed border-gray-200 text-center">
-                <CalendarDays className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Belum Ada Agenda Terjadwal</h3>
-                <p className="text-gray-500 max-w-sm mx-auto">
-                  Saat ini tidak ada acara atau kegiatan yang akan diselenggarakan dalam waktu dekat.
+              <div className="col-span-full py-16 px-4 bg-white rounded-3xl border border-gray-100 shadow-sm text-center max-w-lg mx-auto">
+                <CalendarDays className="w-14 h-14 text-[#C9A84C] mx-auto mb-3" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum Ada Agenda Terjadwal</h3>
+                <p className="text-gray-500 text-sm max-w-sm mx-auto mb-6">
+                  Saat ini belum ada acara desa yang akan diselenggarakan. Warga, RT/RW, dan panitia dapat mendaftarkan acara melalui aplikasi mobile resmi.
                 </p>
-                <Link href="/" className="inline-block mt-6 text-[#1B4332] font-semibold hover:underline">
-                  ← Kembali ke Beranda
-                </Link>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <Link
+                    href="/app"
+                    className="px-6 py-2.5 rounded-xl bg-[#1B4332] text-white font-semibold text-xs hover:bg-[#2D6A4F] transition"
+                  >
+                    Unduh Aplikasi Warga
+                  </Link>
+                  <Link
+                    href="/"
+                    className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold text-xs hover:bg-gray-50 transition"
+                  >
+                    Kembali ke Beranda
+                  </Link>
+                </div>
               </div>
             )}
           </div>

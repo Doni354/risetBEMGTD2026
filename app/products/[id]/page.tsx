@@ -46,7 +46,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let fetchedRelated = relatedSnap.docs.map((d: any) => d.data() as Product);
-    fetchedRelated = fetchedRelated.filter(p => p.id !== product.id); // exclude current
+    fetchedRelated = fetchedRelated.filter((p: Product) => p.id !== product.id); // exclude current
     
     // Sort in code (or use created timestamp if available, here we just show what we got)
     relatedProducts = fetchedRelated.slice(0, 3);

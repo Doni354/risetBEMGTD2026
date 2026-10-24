@@ -50,6 +50,15 @@ export const metadata: Metadata = {
       },
     ],
   },
+  icons: {
+    icon: [
+      { url: '/logo-dlemer.jpg', type: 'image/jpeg' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-light-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    shortcut: '/logo-dlemer.jpg',
+    apple: '/logo-dlemer.jpg',
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'Desa Dlemer — Portal Resmi & Marketplace',
@@ -96,6 +105,9 @@ export default function RootLayout({
   return (
     <html lang="id">
       <head>
+        <link rel="icon" type="image/jpeg" href="/logo-dlemer.jpg" />
+        <link rel="shortcut icon" href="/logo-dlemer.jpg" />
+        <link rel="apple-touch-icon" href="/logo-dlemer.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
+import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges, isSuperAdmin } from '@/lib/firebase/verify-admin';
 import { adminDb } from '@/lib/firebase/admin';
 import { VillageEvent } from '@/lib/types';
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 /**
  * PATCH /api/events/[id]
  * Admin only.
- * - Jika createdBy === admin.id: bisa edit semua field
+ * - Jika createdBy === admin.id atau Super Admin: bisa edit semua field
  * - Jika bukan: hanya bisa update field 'approved'
  */
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
@@ -38,7 +38,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
     const docSnap = await adminDb.collection('events').doc(id).get();
@@ -49,8 +49,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     let updateData: Partial<VillageEvent> & { updatedAt: number; approvedBy?: string; approvedAt?: number };
 
-    if (existing.createdBy === admin.id) {
-      // Full edit — event milik admin ini sendiri
+    if (existing.createdBy === admin.id || isSuperAdmin(admin)) {
+      // Full edit — event milik admin ini sendiri atau Super Admin
       updateData = { ...data, updatedAt: Date.now() };
     } else {
       // Restricted — hanya boleh approve/reject
@@ -80,7 +80,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
     await adminDb.collection('events').doc(id).delete();

@@ -9,6 +9,7 @@ interface EventListProps {
   events: VillageEvent[];
   idToken: string | null;
   adminId: string;
+  isSuperAdmin?: boolean;
   onDelete: (id: string) => void;
   onEdit: (event: VillageEvent) => void;
   onApprove?: (event: VillageEvent) => void;
@@ -16,7 +17,7 @@ interface EventListProps {
 }
 
 export default function EventList({
-  events, idToken, adminId, onDelete, onEdit, onApprove, showApprovalButton,
+  events, idToken, adminId, isSuperAdmin, onDelete, onEdit, onApprove, showApprovalButton,
 }: EventListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
@@ -74,7 +75,7 @@ export default function EventList({
   const formatDate = (ts: number) =>
     new Date(ts).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
-  const isOwned = (e: VillageEvent) => e.createdBy === adminId;
+  const isOwned = (e: VillageEvent) => isSuperAdmin || e.createdBy === adminId;
 
   if (events.length === 0) {
     return <div className="text-center py-12 text-gray-400 text-sm">Tidak ada acara</div>;

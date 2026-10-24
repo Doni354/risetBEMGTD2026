@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
+import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges, isSuperAdmin } from '@/lib/firebase/verify-admin';
 import { adminDb } from '@/lib/firebase/admin';
 import { Product } from '@/lib/types';
 
@@ -38,8 +38,8 @@ export async function GET(
 /**
  * PATCH /api/products/[id]
  * Update product (admin only).
- * - Jika createdBy === admin.id: bisa edit semua field
- * - Jika bukan (buatan warga): hanya bisa ubah 'approved'
+ * - Jika createdBy === admin.id atau Super Admin: bisa edit semua field
+ * - Jika bukan: hanya bisa ubah 'approved'
  */
 export async function PATCH(
   request: NextRequest,
@@ -50,7 +50,7 @@ export async function PATCH(
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
     const docSnap = await adminDb.collection('products').doc(id).get();
@@ -61,8 +61,8 @@ export async function PATCH(
 
     let updateData: Record<string, unknown>;
 
-    if (existing.createdBy === admin.id) {
-      // Full edit — produk buatan admin ini sendiri
+    if (existing.createdBy === admin.id || isSuperAdmin(admin)) {
+      // Full edit — produk buatan admin ini sendiri atau Super Admin
       updateData = { ...data, updatedAt: Date.now() };
     } else {
       // Restricted — hanya bisa approve/reject (data warga)
@@ -96,7 +96,7 @@ export async function DELETE(
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const { id } = await params;
     await adminDb.collection('products').doc(id).delete();

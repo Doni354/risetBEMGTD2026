@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
-import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
+import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges } from '@/lib/firebase/verify-admin';
 import { Product } from '@/lib/types';
 import { MOCK_PRODUCTS } from '@/lib/firebase/mock-data';
 
@@ -23,21 +23,19 @@ export async function GET(request: NextRequest) {
     
     if (token) {
       const admin = await verifyAdmin(token);
-      if (admin) isAdmin = true;
+      if (admin && (admin.role === 'admin' || admin.role === 'superadmin' || admin.role === 'moderator')) {
+        isAdmin = true;
+      }
     }
 
     const snapshot = await adminDb.collection('products').orderBy('createdAt', 'desc').get();
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let products = snapshot.docs.map((doc: any) => doc.data() as Product);
 
     // Only filter approved if NOT admin (IN-MEMORY to avoid composite index errors)
     if (!isAdmin) {
       products = products.filter((p: Product) => p.approved === true);
-    }
-
-    // Fallback to mock products if database is empty/offline
-    if (products.length === 0) {
-      products = MOCK_PRODUCTS;
     }
 
     // Manual basic pagination for array
@@ -70,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const data = await request.json();
 

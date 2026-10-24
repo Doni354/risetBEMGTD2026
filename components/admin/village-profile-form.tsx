@@ -226,11 +226,28 @@ export default function VillageProfileForm({ initialData, idToken, onSuccess }: 
       </div>
 
       <div className={sectionClass}>
-        <h3 className="text-base font-semibold text-gray-900">Media Sosial</h3>
+        <h3 className="text-base font-semibold text-gray-900">Media Sosial & WhatsApp</h3>
         <div className="grid md:grid-cols-3 gap-4">
-          <div><label className={labelClass}>Instagram</label><input type="url" name="social_instagram" value={formData.socialMedia?.instagram || ''} onChange={handleChange} className={inputClass} /></div>
-          <div><label className={labelClass}>Facebook</label><input type="url" name="social_facebook" value={formData.socialMedia?.facebook || ''} onChange={handleChange} className={inputClass} /></div>
-          <div><label className={labelClass}>WhatsApp</label><input type="text" name="social_whatsapp" value={formData.socialMedia?.whatsapp || ''} onChange={handleChange} className={inputClass} /></div>
+          <div>
+            <label className={labelClass}>Instagram (URL)</label>
+            <input type="url" name="social_instagram" value={formData.socialMedia?.instagram || ''} onChange={handleChange} className={inputClass} placeholder="https://instagram.com/..." />
+          </div>
+          <div>
+            <label className={labelClass}>Facebook (URL)</label>
+            <input type="url" name="social_facebook" value={formData.socialMedia?.facebook || ''} onChange={handleChange} className={inputClass} placeholder="https://facebook.com/..." />
+          </div>
+          <div>
+            <label className={labelClass}>Nomor WhatsApp Desa</label>
+            <input
+              type="text"
+              name="social_whatsapp"
+              value={formData.socialMedia?.whatsapp || ''}
+              onChange={handleChange}
+              className={inputClass}
+              placeholder="081234567890"
+            />
+            <p className="text-[11px] text-gray-400 mt-1">Cukup masukkan nomor telepon biasa.</p>
+          </div>
         </div>
       </div>
 

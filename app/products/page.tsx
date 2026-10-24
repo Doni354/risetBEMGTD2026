@@ -190,12 +190,18 @@ export default function ProductsPage() {
                 )}
               </>
             ) : (
-              <div className="text-center py-20">
-                <ShoppingBag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Produk</h3>
-                <p className="text-gray-500 text-sm">
-                  Belum ada produk tersedia dalam kategori ini. Cek kembali nanti!
+              <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center max-w-lg mx-auto shadow-sm">
+                <ShoppingBag className="w-12 h-12 text-[#C9A84C] mx-auto mb-3" />
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Belum Ada Produk Ditampilkan</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-6">
+                  Produk UMKM desa akan segera ditampilkan di sini. Jika Anda warga atau pengusaha di Desa Dlemer, daftarkan produk Anda sekarang lewat aplikasi resmi!
                 </p>
+                <Link
+                  href="/app"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1B4332] text-white font-semibold text-sm hover:bg-[#2D6A4F] transition shadow-sm"
+                >
+                  Unduh Aplikasi Warga untuk Pengajuan
+                </Link>
               </div>
             )}
           </div>

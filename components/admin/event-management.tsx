@@ -10,9 +10,10 @@ import { Plus, CalendarDays } from 'lucide-react';
 interface EventManagementProps {
   idToken: string | null;
   adminId: string;
+  isSuperAdmin?: boolean;
 }
 
-export default function EventManagement({ idToken, adminId }: EventManagementProps) {
+export default function EventManagement({ idToken, adminId, isSuperAdmin }: EventManagementProps) {
   const [events, setEvents] = useState<VillageEvent[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<VillageEvent | null>(null);
@@ -112,6 +113,7 @@ export default function EventManagement({ idToken, adminId }: EventManagementPro
           events={activeTab === 'pending' ? pending : approved}
           idToken={idToken}
           adminId={adminId}
+          isSuperAdmin={isSuperAdmin}
           onDelete={handleDeleted}
           onEdit={(e) => { setSelectedEvent(e); setShowForm(true); }}
           onApprove={handleApproved}

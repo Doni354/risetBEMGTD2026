@@ -46,8 +46,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let fetchedRelated = relatedSnap.docs.map((d: any) => d.data() as VillageEvent);
-    fetchedRelated = fetchedRelated.filter(e => e.id !== event.id); // exclude current
-    fetchedRelated.sort((a, b) => b.date - a.date);
+    fetchedRelated = fetchedRelated.filter((e: VillageEvent) => e.id !== event.id); // exclude current
+    fetchedRelated.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
     relatedEvents = fetchedRelated.slice(0, 3); // Take max 3
   } catch (error) {
     console.error('Error fetching related events:', error);

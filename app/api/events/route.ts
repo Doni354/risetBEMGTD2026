@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
-import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
+import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges } from '@/lib/firebase/verify-admin';
 import { VillageEvent } from '@/lib/types';
 
 const EVENT_CATEGORIES = ['Keagamaan','Olahraga','Kebudayaan','Pendidikan','Sosial','Pemerintahan','Lainnya'];
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     let isAdmin = false;
     if (token) {
       const admin = await verifyAdmin(token);
-      if (admin) isAdmin = true;
+      if (admin && hasAdminPrivileges(admin)) isAdmin = true;
     }
 
     const snapshot = await adminDb.collection('events').orderBy('date', 'asc').get();
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const admin = await verifyAdmin(token);
-    if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!admin || !hasAdminPrivileges(admin)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
     const data = await request.json();
 

@@ -10,9 +10,10 @@ import { Plus, ShoppingBag } from 'lucide-react';
 interface ProductManagementProps {
   idToken: string | null;
   adminId: string;
+  isSuperAdmin?: boolean;
 }
 
-export default function ProductManagement({ idToken, adminId }: ProductManagementProps) {
+export default function ProductManagement({ idToken, adminId, isSuperAdmin }: ProductManagementProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -113,6 +114,7 @@ export default function ProductManagement({ idToken, adminId }: ProductManagemen
           products={activeTab === 'pending' ? pending : approved}
           idToken={idToken}
           adminId={adminId}
+          isSuperAdmin={isSuperAdmin}
           onDelete={handleDeleted}
           onEdit={(p) => { setSelectedProduct(p); setShowForm(true); }}
           onApprove={handleApproved}

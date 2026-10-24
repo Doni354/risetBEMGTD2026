@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAdmin, getTokenFromRequest } from '@/lib/firebase/verify-admin';
+import { verifyAdmin, getTokenFromRequest, hasAdminPrivileges, isSuperAdmin } from '@/lib/firebase/verify-admin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,15 +9,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const admin = await verifyAdmin(token);
+    const user = await verifyAdmin(token);
 
-    if (!admin) {
+    if (!user) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
+    const isAdmin = hasAdminPrivileges(user);
+    const superAdmin = isSuperAdmin(user);
+
     return NextResponse.json({
       success: true,
-      user: admin,
+      isAdmin,
+      isSuperAdmin: superAdmin,
+      user,
     });
   } catch (error) {
     console.error('Verify admin error:', error);

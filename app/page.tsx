@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Phone, Mail, Users, Home, Ruler, ArrowRight, Calendar, ExternalLink } from 'lucide-react';
-import { VillageEvent } from '@/lib/types';
-import { MOCK_VILLAGE_PROFILE, MOCK_PRODUCTS } from '@/lib/firebase/mock-data';
+import { MapPin, Phone, Mail, Users, Home, Ruler, ArrowRight, Calendar, ExternalLink, ShoppingBag } from 'lucide-react';
+import { VillageEvent, Product } from '@/lib/types';
+import { MOCK_VILLAGE_PROFILE } from '@/lib/firebase/mock-data';
 import Navbar from '@/components/navbar';
 import Footer from '@/components/footer';
 import { adminDb } from '@/lib/firebase/admin';
@@ -19,6 +19,7 @@ export const revalidate = 3600;
 async function HomePage() {
   let profile = MOCK_VILLAGE_PROFILE;
   let events: VillageEvent[] = [];
+  let products: Product[] = [];
 
   try {
     const docSnap = await adminDb.collection('village_profile').doc('main-village').get();
@@ -34,6 +35,15 @@ async function HomePage() {
     let fetchedEvents = eventsSnap.docs.map((doc: any) => doc.data() as VillageEvent);
     fetchedEvents.sort((a: VillageEvent, b: VillageEvent) => b.date - a.date);
     events = fetchedEvents.slice(0, 3);
+
+    const productsSnap = await adminDb.collection('products')
+      .where('approved', '==', true)
+      .get();
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let fetchedProducts = productsSnap.docs.map((doc: any) => ({ id: doc.id, ...doc.data() }) as Product);
+    fetchedProducts.sort((a: Product, b: Product) => (b.createdAt || 0) - (a.createdAt || 0));
+    products = fetchedProducts.slice(0, 3);
   } catch (error) {
     console.error('Error fetching data on server:', error);
   }
@@ -444,47 +454,76 @@ async function HomePage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {MOCK_PRODUCTS.slice(0, 3).map((product) => (
-                <Link
-                  key={product.id}
-                  href={`/products/${product.id}`}
-                  className="group bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-white/8 hover:border-[#C9A84C]/40 hover:bg-white/10 transition-all duration-500 shadow-xl block hover:-translate-y-1"
-                >
-                  {product.imageUrl && (
-                    <div className="h-52 overflow-hidden relative">
-                      <Image
-                        src={product.imageUrl}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-110 transition-transform duration-700"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                      {/* Category tag */}
-                      <div className="absolute bottom-3 left-3 text-[10px] font-bold text-white bg-black/40 backdrop-blur px-2.5 py-1 rounded-full">
-                        {product.category}
+            {products.length === 0 ? (
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-10 md:p-14 text-center max-w-xl mx-auto backdrop-blur-md">
+                <div className="w-16 h-16 rounded-2xl bg-[#C9A84C]/15 border border-[#C9A84C]/30 flex items-center justify-center mx-auto mb-4 text-[#C9A84C]">
+                  <ShoppingBag className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl md:text-2xl font-bold text-white">Katalog Produk UMKM Segera Hadir</h3>
+                <p className="text-white/60 text-sm mt-2 leading-relaxed">
+                  Warga Desa Dlemer yang memiliki produk lokal (kuliner, kerajinan, batik, dll.) dapat mengajukan produk untuk dipromosikan di sini melalui aplikasi resmi.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3 justify-center">
+                  <Link
+                    href="/app"
+                    className="px-6 py-3 rounded-full bg-[#C9A84C] text-[#1B4332] font-bold text-sm hover:bg-[#FFE599] transition hover:scale-105"
+                  >
+                    Unduh Aplikasi Warga
+                  </Link>
+                  <Link
+                    href="/products"
+                    className="px-6 py-3 rounded-full bg-white/10 text-white font-semibold text-sm hover:bg-white/20 transition border border-white/10"
+                  >
+                    Katalog Lengkap
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => (
+                  <Link
+                    key={product.id}
+                    href={`/products/${product.id}`}
+                    className="group bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden border border-white/8 hover:border-[#C9A84C]/40 hover:bg-white/10 transition-all duration-500 shadow-xl block hover:-translate-y-1"
+                  >
+                    {product.imageUrl ? (
+                      <div className="h-52 overflow-hidden relative">
+                        <Image
+                          src={product.imageUrl}
+                          alt={product.name}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                        <div className="absolute bottom-3 left-3 text-[10px] font-bold text-white bg-black/40 backdrop-blur px-2.5 py-1 rounded-full">
+                          {product.category}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="h-52 bg-white/10 flex items-center justify-center text-4xl">
+                        🛍️
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <h3 className="font-bold text-white text-base mb-2 group-hover:text-[#C9A84C] transition-colors">{product.name}</h3>
+                      <p className="text-white/40 text-sm line-clamp-2 mb-5 leading-relaxed">{product.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] text-white/30 mb-0.5">Mulai dari</p>
+                          <p className="text-[#C9A84C] font-extrabold text-xl">
+                            Rp {product.price.toLocaleString('id-ID')}
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white group-hover:bg-[#C9A84C] group-hover:text-[#1B4332] transition-all duration-300 group-hover:scale-110">
+                          <ExternalLink className="w-4 h-4" />
+                        </div>
                       </div>
                     </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="font-bold text-white text-base mb-2 group-hover:text-[#C9A84C] transition-colors">{product.name}</h3>
-                    <p className="text-white/40 text-sm line-clamp-2 mb-5 leading-relaxed">{product.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] text-white/30 mb-0.5">Mulai dari</p>
-                        <p className="text-[#C9A84C] font-extrabold text-xl">
-                          Rp {product.price.toLocaleString('id-ID')}
-                        </p>
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-white/8 flex items-center justify-center text-white group-hover:bg-[#C9A84C] group-hover:text-[#1B4332] transition-all duration-300 group-hover:scale-110">
-                        <ExternalLink className="w-4 h-4" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <div className="text-center mt-14">
               <Link

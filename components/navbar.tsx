@@ -25,6 +25,7 @@ export default function Navbar() {
     { href: '/', label: 'Beranda' },
     { href: '/events', label: 'Acara' },
     { href: '/products', label: 'Produk Desa' },
+    { href: '/app', label: 'Aplikasi Warga' },
   ];
 
   return (

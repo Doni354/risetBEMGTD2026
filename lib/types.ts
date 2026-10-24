@@ -81,12 +81,15 @@ export type EventCategory =
   | 'Pemerintahan'
   | 'Lainnya';
 
+export type UserRole = 'superadmin' | 'admin' | 'moderator' | 'user';
+
 /** Admin user - collection: admin_users */
 export interface AdminUser {
   id: string;
   email: string;
   displayName: string;
-  role: 'admin' | 'moderator';
+  role: UserRole;
   createdAt: number;
   lastLogin?: number;
+  photoURL?: string;
 }

@@ -43,7 +43,7 @@ export async function getDocuments<T extends DocumentData>(
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
-    } as T));
+    } as unknown as T));
   } catch (error) {
     console.error(`[Firebase] Error getting documents:`, error);
     return [];
@@ -102,7 +102,7 @@ export async function getPaginatedDocuments<T extends DocumentData>(
       .map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      } as T));
+      } as unknown as T));
 
     const hasMore = querySnapshot.docs.length > pageSize;
 
